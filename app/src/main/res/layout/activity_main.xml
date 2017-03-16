@@ -6,10 +6,101 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/recycler_view"
-        android:scrollbars="vertical"
+
+    <TextView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="wrap_content"
+        android:text="GetUser Api Responce :"
+        android:id="@+id/GetUser"
+        android:padding="5dp"
+        android:textColor="@color/colorAccent"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/txt_user_detail_id"
+        android:textSize="18sp"
+        android:textColor="@color/colorPrimary"
+        android:padding="5dp"
+        android:layout_marginTop="10dp"
+        android:layout_below="@+id/GetUser"
+        />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="10dp"
+        android:id="@+id/v1"
+        android:layout_below="@+id/txt_user_detail_id"
+        android:background="@color/colorAccent"
+        />
+
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="GetLocation :"
+        android:id="@+id/GetLocation"
+        android:layout_below="@+id/v1"
+        android:padding="5dp"
+        android:textColor="@color/colorAccent"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="10dp"
+        android:id="@+id/v2"
+        android:layout_below="@+id/GetLocation_id"
+        android:background="@color/colorAccent"
+        />
+
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="GetListOfUser :"
+        android:id="@+id/GetListOfUser"
+        android:layout_below="@+id/v2"
+        android:padding="5dp"
+        android:textColor="@color/colorAccent"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/GetListOfUser_id"
+        android:textSize="18sp"
+        android:textColor="@color/colorPrimary"
+        android:padding="5dp"
+        android:layout_marginTop="10dp"
+        android:layout_below="@+id/GetListOfUser"
+        />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="10dp"
+        android:id="@+id/v3"
+        android:layout_below="@+id/GetListOfUser_id"
+        android:background="@color/colorAccent"
+        />
+
+
+
+    <ProgressBar
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:id="@+id/progressDialog"
+        />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/GetLocation_id"
+        android:textSize="18sp"
+        android:textColor="@color/colorPrimary"
+        android:padding="5dp"
+        android:layout_below="@+id/GetLocation"
+        android:layout_alignParentStart="true" />
 
 </RelativeLayout>

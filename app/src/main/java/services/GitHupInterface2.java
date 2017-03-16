@@ -3,6 +3,7 @@ package services;
 import com.google.gson.JsonObject;
 
 import io.reactivex.Observable;
+import models.UserResponce;
 import retrofit2.http.GET;
 
 /**
@@ -11,6 +12,14 @@ import retrofit2.http.GET;
 
 public interface GitHupInterface2 {
 
+
+    @GET("/getUser")
+    public Observable<JsonObject> getOrangeUser();
+
     @GET("/getLocation")
     public Observable<JsonObject> getLocation();
+
+
+    @GET("/getUserList")
+    public Observable<JsonObject>getUserList();
 }

@@ -1,69 +1,61 @@
 package com.test.test;
 
-import android.database.Observable;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.util.Log;
-import android.widget.Toast;
+import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
-
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 
-import org.json.JSONObject;
-
 import java.util.ArrayList;
-import java.util.List;
 
-import adapters.DataAdapter;
-import io.reactivex.ObservableEmitter;
-import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.Observer;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.BiFunction;
+import io.reactivex.functions.Function3;
 import io.reactivex.schedulers.Schedulers;
-import models.MyModel;
-import models.User;
 import models.UserResponce;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
-
-import services.GitHubInterface;
 import services.GitHupInterface2;
-import services.RequestInterface;
-
-import static android.support.v7.recyclerview.R.styleable.RecyclerView;
 
 
 public class MainActivity extends AppCompatActivity {
 
+    //Define variables:
 
+    private ProgressBar progressBar;
+    private TextView txt_user_details, txt_location, txt_list_user;
     public static final String BASE_URL = "http://demo1043736.mockable.io/";
-
-    private RecyclerView mRecyclerView;
-
     private CompositeDisposable mCompositeDisposable;
 
-    private DataAdapter mAdapter;
-
-    private ArrayList<UserResponce> mAndroidArrayList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //findViews:
+        findViews();
+
+        //calling 3 api:
+        FetchMultipleRequest();
+    }
+
+    private void findViews() {
         mCompositeDisposable = new CompositeDisposable();
-        initRecyclerView();
-       // loadJSON();
-        doSomeWork();
+        progressBar = (ProgressBar) findViewById(R.id.progressDialog);
+        txt_user_details = (TextView) findViewById(R.id.txt_user_detail_id);
+        txt_location = (TextView) findViewById(R.id.GetLocation_id);
+        txt_list_user = (TextView) findViewById(R.id.GetListOfUser_id);
+
     }
 
 
-    private void doSomeWork() {
+    private void FetchMultipleRequest() {
 
 
         Retrofit repo = new Retrofit.Builder()
@@ -73,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
                 .build();
 
         io.reactivex.Observable<JsonObject> userObservable = repo
-                .create(GitHubInterface.class)
+                .create(GitHupInterface2.class)
                 .getOrangeUser()
                 .subscribeOn(Schedulers.newThread());
 
@@ -82,14 +74,20 @@ public class MainActivity extends AppCompatActivity {
                 .getLocation()
                 .subscribeOn(Schedulers.newThread());
 
+        io.reactivex.Observable<JsonObject> listOfUserObservable = repo
+                .create(GitHupInterface2.class)
+                .getUserList()
+                .subscribeOn(Schedulers.newThread());
 
-        io.reactivex.Observable.zip(userObservable, locationObservable,
-                new BiFunction<JsonObject, JsonObject, ArrayList<JsonObject> >() {
+
+        io.reactivex.Observable.zip(userObservable, locationObservable, listOfUserObservable,
+                new Function3<JsonObject, JsonObject, JsonObject, ArrayList<JsonObject>>() {
                     @Override
-                    public ArrayList<JsonObject> apply(JsonObject cricketFans, JsonObject footballFans) throws Exception {
+                    public ArrayList<JsonObject> apply(JsonObject userObj, JsonObject locObj, JsonObject listUserObj) throws Exception {
                         ArrayList<JsonObject> x = new ArrayList<>();
-                        x.add(cricketFans);
-                        x.add(footballFans);
+                        x.add(userObj);
+                        x.add(locObj);
+                        x.add(listUserObj);
                         return x;
                     }
                 })
@@ -102,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private Observer<ArrayList<JsonObject> > getObserver() {
+    private Observer<ArrayList<JsonObject>> getObserver() {
         return new Observer<ArrayList<JsonObject>>() {
 
 
@@ -113,8 +111,19 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onNext(ArrayList<JsonObject> value) {
-                System.out.println("value is==>  "+value.get(0) + "  " +  value.get(1));
+            public void onNext(final ArrayList<JsonObject> value) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        progressBar.setVisibility(View.GONE);
+
+                        showResult(value);
+
+                    }
+                });
+
+                System.out.println("value is==>  " + value.get(0) + "  " + value.get(1) + "  " + value.get(2));
             }
 
 
@@ -128,63 +137,40 @@ public class MainActivity extends AppCompatActivity {
                 System.out.println("value is==>  onComplete");
 
             }
-        };}
-
-
-//
-//    private void fetchMultipleReq() {
-//
-//        private Observable<String> externalCall(String url, int delayMilliseconds) {
-//            return Observable.create(
-//                    subscriber -> {
-//                        try {
-//                            Thread.sleep(delayMilliseconds); //simulate long operation
-//                            subscriber.onNext("response(" + url + ") ");
-//
-//                        } catch (InterruptedException e) {
-//                            subscriber.onError(e);
-//                        }
-//                    }
-//            );
-//        }
-//    }
-
-    private void initRecyclerView() {
-
-        mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-        mRecyclerView.setHasFixedSize(true);
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
-        mRecyclerView.setLayoutManager(layoutManager);
+        };
     }
 
-//    private void loadJSON() {
-//
-//        RequestInterface requestInterface = new Retrofit.Builder()
-//                .baseUrl(BASE_URL)
-//                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-//                .addConverterFactory(GsonConverterFactory.create())
-//                .build().create(RequestInterface.class);
-//
-//        mCompositeDisposable.add(requestInterface.getUserList()
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribeOn(Schedulers.io())
-//                .subscribe(this::handleResponse,this::handleError));
-//    }
+    private void showResult(ArrayList<JsonObject> value) {
 
-    private void handleResponse(UserResponce androidList) {
-        System.out.println("list" + androidList.getData().get(0).getName() +"     "+ androidList.getData().get(0).getUser_id());
+        Gson gson = new Gson();
+        UserResponce json = gson.fromJson(value.get(0), UserResponce.class);
+        String name = json.getName();
+        int user_id = json.getUser_id();
+        String job_Title = json.getJob_title();
+        txt_user_details.setText("3id ==> " + user_id + " & name ==>  " + name + "& job ==> " + job_Title);
+
+        UserResponce json2 = gson.fromJson(value.get(1), UserResponce.class);
+        String lat = "", lang = "";
+        for (int i = 0; i < json2.getData().size(); i++) {
+            lat += String.valueOf(json2.getData().get(i).getLatitude()) + "  &   ";
+            lang += String.valueOf(json2.getData().get(i).getLongitude()) + "\n ";
+            txt_location.setText("Latitude  ==> " + lat + " & Longitude ==>  " + lang);
+        }
+
+        UserResponce json3 = gson.fromJson(value.get(2), UserResponce.class);
+        String list_name = " ", list_user_id = " ";
+
+        for (int j = 0; j < json3.getData().size(); j++) {
+            list_user_id += String.valueOf(json3.getData().get(j).getUser_id()) + " & ";
+            list_name += json3.getData().get(j).getName() + " \n ";
+            txt_list_user.setText("3id ==> " + list_user_id + " & name ==>  " + list_name);
+        }
 
 
-//        mAndroidArrayList = new ArrayList<>(androidList);
-//        mAdapter = new DataAdapter(mAndroidArrayList);
-//        mRecyclerView.setAdapter(mAdapter);
+
+
     }
 
-    private void handleError(Throwable error) {
-
-        Toast.makeText(this, "Error "+error.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
-        System.out.println("Error "+error.getLocalizedMessage());
-    }
 
     @Override
     public void onDestroy() {
